@@ -61,6 +61,17 @@ const Output = ({ who, title, pkg, children }) => (
     {children}
   </box>
 )
+const Panel = ({ title, color, children }) => (
+  <box border borderStyle="rounded" borderColor={color} title={title} flexGrow={1} flexBasis={0} flexDirection="column" paddingX={1} paddingY={1} gap={1}>
+    {children}
+  </box>
+)
+const Item = ({ name, children }) => (
+  <box flexDirection="column">
+    <text><Hi>{name}</Hi></text>
+    <P fg={C.dim}>{children}</P>
+  </box>
+)
 const Step = ({ n, who, title, children }) => (
   <box flexDirection="row" gap={2} marginBottom={1} width="100%">
     <box flexDirection="column" width={22}>
@@ -252,55 +263,27 @@ const SLIDES = [
     ],
   },
   {
-    title: "what you build with",
+    title: "build it, ship it",
     blocks: [
       <>
-        <P><Hi>Components</Hi> <Dim>(lowercase JSX tags, like HTML)</Dim></P>
-        <P fg={C.dim}>box · text · span · input · textarea · select · tab-select · scrollbox · ascii-font · code · markdown · diff</P>
+        <box flexDirection="row" gap={2} width="100%">
+          <Panel title=" build with " color={C.green}>
+            <Item name="components">box, text, input, select, tabs, scrollbox, ascii-font, markdown…</Item>
+            <Item name="hooks">useKeyboard, useTerminalDimensions, focus, animations</Item>
+            <Item name="registry">bunx create-gridland add spinner copies the source into your repo</Item>
+            <Item name="tests">render a component, check the cells</Item>
+          </Panel>
+          <Panel title=" ship as " color={C.key}>
+            <Item name="a binary">bun build --compile: one file, no Node or npm needed</Item>
+            <Item name="a web page">Vite and Next.js plugins</Item>
+            <Item name="a sandbox">run it in Docker from npm, GitHub or a folder</Item>
+          </Panel>
+        </box>
         <Gap />
-      </>,
-      <>
-        <P><Hi>Hooks</Hi> <Dim>(from @gridland/utils, work in both backends)</Dim></P>
-        <P fg={C.dim}>useKeyboard · useTerminalDimensions · useOnResize · useTimeline · focus system with useInteractive</P>
-        <Gap />
-      </>,
-      <>
-        <P><Hi>A component registry</Hi> <Dim>(shadcn style)</Dim></P>
-        <P fg={C.dim}>
-          bunx create-gridland add spinner copies the component's source into your repo. You own it and edit it,
-          instead of depending on a black-box package.
+        <P>
+          Good fits: <Hi>interactive docs</Hi>, a live demo of your CLI on its website, dashboards, chat-style AI tools.
         </P>
-        <Gap />
       </>,
-      <>
-        <P><Hi>Testing utilities</Hi> <Dim>render a component and assert on the captured cells</Dim></P>
-      </>,
-    ],
-  },
-  {
-    title: "shipping it",
-    blocks: [
-      <>
-        <P><Hi>As a CLI</Hi></P>
-        <P fg={C.dim}>
-          bun build --compile bundles your app and the Bun runtime into one executable. Users download a file and run it:
-          no Node, no npm install.
-        </P>
-        <Gap />
-      </>,
-      <>
-        <P><Hi>On the web</Hi></P>
-        <P fg={C.dim}>Vite and Next.js plugins, so a terminal UI can live inside an existing site or docs page.</P>
-        <Gap />
-      </>,
-      <>
-        <P><Hi>Sandboxed</Hi></P>
-        <P fg={C.dim}>Run a TUI in an isolated Docker container, straight from an npm package, a GitHub repo or a local folder.</P>
-        <Gap />
-      </>,
-      <P>
-        Good fits: <Hi>interactive docs</Hi>, a live demo of your CLI on its landing page, internal dashboards, chat-style AI tools.
-      </P>,
     ],
   },
   {
