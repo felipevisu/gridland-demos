@@ -46,30 +46,19 @@ const Code = ({ title, lines, width }) => (
 const Tag = ({ who, width = 10 }) => (
   <span style={{ fg: "#000000", bg: WHO[who], bold: true }}>{` ${who} `.padEnd(width)}</span>
 )
-const Layer = ({ who, what, lines }) => (
-  <box border borderStyle="rounded" borderColor={WHO[who]} flexDirection="column" paddingX={1} marginBottom={1}>
-    <text>
-      <Tag who={who} /> <Dim>{what}</Dim>
-    </text>
-    {lines.map((l, i) => <P key={i}>{l}</P>)}
+const Who = ({ who, children }) => (
+  <box flexDirection="row" gap={1} width="100%" marginBottom={1}>
+    <text><Tag who={who} /></text>
+    <box flexGrow={1} flexShrink={1} minWidth={0}>
+      <P>{children}</P>
+    </box>
   </box>
 )
-const Compare = ({ rows }) => (
-  <box flexDirection="column">
-    <text>
-      <Dim>{"".padEnd(16)}</Dim>
-      <Hi fg={C.dim}>{"React on the web".padEnd(28)}</Hi>
-      <Hi>{"React with Gridland".padEnd(42)}</Hi>
-      <Dim>who</Dim>
-    </text>
-    {rows.map(([label, web, here, who]) => (
-      <text key={label}>
-        <Dim>{label.padEnd(16)}</Dim>
-        <span style={{ fg: C.dim }}>{web.padEnd(28)}</span>
-        <span style={{ fg: C.text }}>{here.padEnd(42)}</span>
-        <Tag who={who} />
-      </text>
-    ))}
+const Output = ({ who, title, pkg, children }) => (
+  <box border borderStyle="rounded" borderColor={WHO[who]} title={` ${pkg} `} flexGrow={1} flexBasis={0} flexDirection="column" paddingX={1}>
+    <text><Hi fg={WHO[who]}>{title}</Hi></text>
+    <Gap />
+    {children}
   </box>
 )
 const Step = ({ n, who, title, children }) => (
@@ -162,28 +151,9 @@ const SLIDES = [
         </box>
         <Gap />
       </>,
-      <P fg={C.dim}>That's the whole canvas. Everything you'll see today is made of these cells.</P>,
-    ],
-  },
-  {
-    title: "why TUIs are hard",
-    blocks: [
-      <>
-        <P>To paint one green "H" at row 5, column 12, you send the terminal bytes like:</P>
-        <Gap />
-        <Code lines={["\\x1b[5;12H\\x1b[38;2;126;231;135mH"]} width={44} />
-        <P fg={C.dim}>"move the cursor to 5;12, set the color to RGB(126,231,135), print H"</P>
-        <Gap />
-      </>,
-      <>
-        <P>Now do that for a whole screen, 60 times per second, and also:</P>
-        <Bullet>work out where every panel goes when the window is resized</Bullet>
-        <Bullet>repaint only what changed, or the screen flickers</Bullet>
-        <Bullet>decode raw keyboard and mouse bytes into "ctrl+c" or "click at 40,7"</Bullet>
-        <Gap />
-      </>,
       <P>
-        Libraries like curses, Ink or Bubble Tea help, but the result <Hi>only lives in a terminal</Hi>.
+        That's the whole canvas. And that's why terminal apps are hard to build: you{"'"}d have to manipulate the screen
+        <Hi> cell by cell</Hi>, by hand, on every change.
       </P>,
     ],
   },
@@ -192,9 +162,18 @@ const SLIDES = [
     blocks: [
       <>
         <P>
-          Write the interface as <Hi>React components</Hi>. Layout is flexbox, state is hooks, input is a hook.
-          Gridland and the engine under it take care of cells, colors, diffs and key decoding.
+          With Gridland you write the interface as <Hi>React components</Hi>. No cell-by-cell drawing.
         </P>
+        <Gap />
+        <Who who="React">the library you already know: components, props, state, hooks, re-rendering.</Who>
+        <Who who="OpenTUI">
+          an open-source terminal UI engine. It does the hard part: building blocks (Box, Text, Input…), layout,
+          drawing characters into the cells and talking to the terminal.
+        </Who>
+        <Who who="Gridland">
+          wraps OpenTUI so the same app also runs in the browser, and adds portable hooks, a component registry,
+          project templates and single-binary builds.
+        </Who>
         <Gap />
       </>,
       ({ contentW }) => (
@@ -209,161 +188,67 @@ const SLIDES = [
     ],
   },
   {
-    title: "who does what",
+    title: "how it works",
     blocks: [
       <>
-        <P>Three projects stacked on top of each other. Each one has a clear job:</P>
+        <P>Follow one tiny example from your code to the screen:</P>
+        <Gap />
+        <box flexDirection="row" gap={2} alignItems="center">
+          <Code lines={["<box border>", "  <text>hi</text>", "</box>"]} />
+          <text fg={C.dim}>→</text>
+          <Code lines={["Box  { border: true }", "└ Text { content: \"hi\" }"]} />
+          <text fg={C.dim}>→</text>
+          <Code lines={["Box   x0 y0  6×3", "Text  x2 y1  2×1"]} />
+          <text fg={C.dim}>→</text>
+          <box flexDirection="column">
+            <text fg={C.green}>{"╭────╮"}</text>
+            <text><span style={{ fg: C.green }}>{"│ "}</span><Hi fg={C.text}>hi</Hi><span style={{ fg: C.green }}>{" │"}</span></text>
+            <text fg={C.green}>{"╰────╯"}</text>
+          </box>
+        </box>
         <Gap />
       </>,
-      <Layer
-        who="React"
-        what="the library you already know"
-        lines={[
-          "Components, props, useState, useEffect, re-rendering when state changes. Nothing new here.",
-          "Includes react-reconciler: React's official kit for targets other than the DOM (React Native uses the same idea).",
-        ]}
-      />,
-      <Layer
-        who="OpenTUI"
-        what="the terminal UI engine"
-        lines={[
-          "The building blocks: Box, Text, Input, Select… (called renderables).",
-          "Layout (using Yoga), painting characters into the grid, and a native core in Zig that talks to the terminal.",
-          "Also the React binding: it tells React that <box> means \"create a Box\".",
-        ]}
-      />,
-      <Layer
-        who="Gridland"
-        what="everything around it, so it runs anywhere"
-        lines={[
-          "The browser backend (@gridland/web), hooks that work in both places (@gridland/utils), focus handling,",
-          "the component registry, create-gridland, Vite/Next.js plugins and compiling to a single binary.",
-        ]}
-      />,
-    ],
-  },
-  {
-    title: "same react, new target",
-    blocks: [
-      <>
-        <P>If you know React on the web, you already know 80% of this. Only the layers under React change:</P>
-        <Gap />
-      </>,
-      <Compare
-        rows={[
-          ["you write", "<div> <span>", "<box> <text>", "React"],
-          ["React talks to", "React DOM", "OpenTUI's React binding", "OpenTUI"],
-          ["it creates", "DOM nodes", "renderables (JS objects)", "OpenTUI"],
-          ["layout by", "the browser's CSS engine", "Yoga (flexbox library)", "Yoga"],
-          ["units", "pixels", "character cells", "OpenTUI"],
-          ["shown by", "the browser", "terminal (OpenTUI) or canvas (Gridland)", "Gridland"],
-        ]}
-      />,
-      <>
-        <Gap />
-        <P>
-          <Hi fg={C.opentui}>{"<box>"}</Hi> and <Hi fg={C.opentui}>{"<text>"}</Hi> look like HTML tags, but they are not.
-          They are OpenTUI components: the binding turns each one into a Box or Text object. Even in the browser
-          there is no {"<box>"} in the page, only one {"<canvas>"} with everything drawn on it.
-        </P>
-        <Gap />
-        <P>
-          <Hi fg={C.yoga}>Yoga</Hi> is an open-source flexbox engine by Meta, the same one React Native uses.
-          It is C++ compiled to WebAssembly. You give it "row, gap 1, grow"; it gives back x, y, width and height.
-        </P>
-      </>,
-    ],
-  },
-  {
-    title: "one frame, step by step",
-    blocks: [
-      <Step n="1" who="React" title="state changes">
-        You press space, setN(n + 1) runs, React re-renders Counter and works out what changed. Exactly like on the web.
+      <Step n="1" who="React" title="render">
+        You write {"<box>"} and {"<text>"}. When state changes, React re-renders, exactly like on the web.
       </Step>,
-      <Step n="2" who="OpenTUI" title="update the tree">
-        Instead of touching DOM nodes, the binding updates the Text object inside the Box: new content "pressed 1 times".
+      <Step n="2" who="OpenTUI" title="one object per tag">
+        There is no HTML here. For each tag, OpenTUI keeps a plain object that remembers its props: this Box has a
+        border, this Text says "hi". It plays the role the DOM plays in a browser.
       </Step>,
       <Step n="3" who="Yoga" title="layout">
-        Every Box and Text gets a position and size in cells: "this border starts at column 4, row 2, is 30 wide".
+        Yoga, Meta's flexbox library (also used by React Native), decides where each object goes, measured in cells:
+        the Box is 6 cells wide and 3 tall, the Text sits inside it.
       </Step>,
-      <Step n="4" who="OpenTUI" title="paint">
-        Not a library, just a step: each renderable writes its characters and colors into the cell grid. A Box writes
-        ╭─╮ border characters, a Text writes its letters.
+      <Step n="4" who="OpenTUI" title="turn into cells">
+        OpenTUI asks every object to draw itself into the cell grid. The Box fills its edge cells with ╭ ─ ╮ │ ╰ ╯, the
+        Text puts h and i in the next two cells. The result is just characters and colors, the grid from slide 2.
       </Step>,
-      <Step n="5" who="Gridland" title="show it">
-        The grid reaches the screen. Terminal: OpenTUI's Zig core sends only the cells that changed. Browser: Gridland
-        draws the grid on a canvas.
+      <Step n="5" who="Gridland" title="show">
+        The grid goes to the terminal (only the cells that changed) or to a canvas in the browser.
       </Step>,
     ],
   },
   {
-    title: "the cell buffer",
+    title: "one grid, two screens",
     blocks: [
       <>
-        <P>The contract between "your app" and "the screen" is a few flat typed arrays, one slot per cell:</P>
+        <P>The last step is the only one that changes. The same grid of cells goes to:</P>
         <Gap />
-        <Code
-          lines={[
-            "char       Uint32Array        codepoint of each cell",
-            "fg         Float32Array × 4   foreground RGBA",
-            "bg         Float32Array × 4   background RGBA",
-            "attributes Uint32Array        bit flags: bold, italic, underline…",
-          ]}
-          width={72}
-        />
+        <box flexDirection="row" gap={2} width="100%">
+          <Output who="OpenTUI" title="a terminal" pkg="@gridland/bun">
+            <Bullet>native core written in Zig</Bullet>
+            <Bullet>compares with the last frame</Bullet>
+            <Bullet>sends only the changed cells</Bullet>
+          </Output>
+          <Output who="Gridland" title="a browser" pkg="@gridland/web">
+            <Bullet>same engine, rewritten in JS</Bullet>
+            <Bullet>draws each cell on a {"<canvas>"}</Bullet>
+            <Bullet>turns browser keys into the same events</Bullet>
+          </Output>
+        </box>
         <Gap />
+        <P fg={C.dim}>Your components never know which one they are running on.</P>
       </>,
-      <>
-        <P>
-          No objects per cell, no DOM. A 200×50 screen is just 10,000 slots, cheap to fill every frame
-          and cheap to compare with the previous frame.
-        </P>
-        <Gap />
-      </>,
-      <P fg={C.dim}>
-        Mouse clicks use a second grid of the same size, the hit grid, which stores which component owns each cell.
-      </P>,
-    ],
-  },
-  {
-    title: "output 1: a real terminal",
-    blocks: [
-      <>
-        <P>
-          <Hi>@gridland/bun</Hi> loads OpenTUI's native core, written in <Hi>Zig</Hi>, through Bun's FFI
-          (libopentui.dylib on this Mac).
-        </P>
-        <Gap />
-      </>,
-      <>
-        <Bullet>keeps two buffers: the frame on screen and the next one</Bullet>
-        <Bullet>diffs them and writes escape codes <Hi>only for the cells that changed</Hi></Bullet>
-        <Bullet>switches to the alternate screen, so your shell is restored on exit</Bullet>
-        <Bullet>parses keyboard and mouse input, including the modern kitty keyboard protocol</Bullet>
-        <Gap />
-      </>,
-      <P fg={C.dim}>That's why the 3D demos stay smooth: most cells don't change between two frames.</P>,
-    ],
-  },
-  {
-    title: "output 2: a browser canvas",
-    blocks: [
-      <>
-        <P>
-          <Hi>@gridland/web</Hi> swaps the native core for JavaScript versions with the <Hi>same buffer layout</Hi>,
-          so every OpenTUI component works unchanged.
-        </P>
-        <Gap />
-      </>,
-      <>
-        <Bullet>measures the width of "M" in a monospace font to get the cell size</Bullet>
-        <Bullet>paints runs of same-color cells with fillRect, then each character with fillText</Bullet>
-        <Bullet>translates DOM keyboard and mouse events into the same key events the terminal produces</Bullet>
-        <Gap />
-      </>,
-      <P>
-        Result: one component tree, two backends. Gridland's own website is a Gridland app running this way.
-      </P>,
     ],
   },
   {
