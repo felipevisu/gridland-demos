@@ -1,7 +1,7 @@
 // @ts-nocheck
-// Exemplo de UI "de verdade": um monitor de sistema com layout flexbox,
-// bordas com título, barras, sparklines, tabela navegável e um log que rola.
-// Mostra os primitivos <box>, <text> e <span> sem nenhuma biblioteca extra.
+// A "real" UI example: a system monitor with flexbox layout,
+// titled borders, bars, sparklines, a navigable table and a scrolling log.
+// Uses only the <box>, <text> and <span> primitives, no extra libraries.
 import { useEffect, useRef, useState } from "react"
 import { useKeyboard } from "@gridland/utils"
 
@@ -30,10 +30,10 @@ const PROCS = [
 const LOGS = [
   "GET /api/health 200 3ms",
   "cache miss: user:42",
-  "job sync-repos concluído",
-  "nova conexão ws de 10.0.0.12",
+  "job sync-repos done",
+  "new ws connection from 10.0.0.12",
   "GET /r/table.json 200 12ms",
-  "aviso: fila acima de 80%",
+  "warning: queue above 80%",
   "deploy v0.4.3 ok",
   "POST /api/chat 201 140ms",
 ]
@@ -128,10 +128,10 @@ export function DashboardDemo({ width, height }) {
         <Panel title="CPU">
           {st.cpus.map((v, i) => <Bar key={i} label={`cpu${i}`} value={v} width={barW} />)}
         </Panel>
-        <Panel title="Memória">
+        <Panel title="Memory">
           <Bar label="ram" value={st.mem} width={barW} />
         </Panel>
-        <Panel title="Rede (Mb/s)">
+        <Panel title="Network (Mb/s)">
           <Sparkline data={st.net.slice(-sparkW)} color={C.accent} />
           <Sparkline data={st.req.slice(-sparkW)} color={C.focus} />
           <text style={{ fg: C.muted }}>
@@ -140,7 +140,7 @@ export function DashboardDemo({ width, height }) {
         </Panel>
       </box>
       <box flexDirection="column" flexGrow={1}>
-        <Panel title={`Processos (ordenado por ${sortBy})`} focused>
+        <Panel title={`Processes (sorted by ${sortBy})`} focused>
           <text style={{ fg: C.muted, bold: true }}>{"  PROCESSO".padEnd(18) + "USUÁRIO".padEnd(9) + "CPU%".padStart(6) + "MEM MB".padStart(9)}</text>
           {procs.map((p, i) => {
             const active = PROCS[sel].name === p.name
@@ -169,6 +169,6 @@ export function DashboardDemo({ width, height }) {
 }
 
 export const dashboardHelp = [
-  ["↑↓", "processo"],
-  ["s", "ordenar"],
+  ["↑↓", "process"],
+  ["s", "sort"],
 ]

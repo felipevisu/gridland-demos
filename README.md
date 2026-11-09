@@ -1,82 +1,119 @@
 # Gridland Demos
 
-Oito demos feitas com [Gridland](https://github.com/thoughtfulllc/gridland). O **mesmo código React**
-roda no navegador (desenhado num `<canvas>`) e no terminal.
+Demos built with [Gridland](https://github.com/thoughtfulllc/gridland). The **same React code**
+runs in the browser (drawn on a `<canvas>`) and in the terminal. Each demo runs on its own, by name.
 
-| # | Demo | O que mostra |
-|---|------|--------------|
-| 1 | **Cubo 3D** | Cubo sólido com projeção em perspectiva, z-buffer e luz por face |
-| 2 | **Donut 3D** | O clássico `donut.c` com cores por luminância (tecla `c` troca a paleta) |
-| 3 | **Ray Marching** | Cena 3D com SDFs (esfera, toro, chão xadrez), sombra suave e especular. A luz segue as setas ou o mouse |
-| 4 | **Terreno** | Voo sobre um terreno em wireframe, estilo synthwave |
-| 5 | **Túnel** | Túnel infinito por mapeamento polar (`p` troca o padrão) |
-| 6 | **Estrelas** | Campo de estrelas 3D com efeito warp (`↑` acelera) |
-| 7 | **Plasma** | Efeito demoscene clássico com paletas |
-| 8 | **Dashboard** | UI "de verdade": painéis com borda, barras, sparklines, tabela e log |
+### Visual (`demos/visual/`)
 
-## Rodando
+| Name | What it shows |
+|------|---------------|
+| `cube` | Solid cube with perspective projection, z-buffer and per-face lighting |
+| `donut` | The classic `donut.c` with luminance-based color (`c` switches the palette) |
+| `raymarch` | 3D scene made of SDFs, with soft shadows and specular. The light follows the arrow keys or the mouse |
+| `terrain` | Flight over a wireframe terrain, synthwave style |
+| `tunnel` | Infinite tunnel via polar mapping (`p` switches the pattern) |
+| `starfield` | 3D starfield with a warp effect (`↑` speeds up) |
+| `plasma` | Classic demoscene effect with palettes |
+| `dashboard` | A "real" UI: bordered panels, bars, sparklines, a table and a log |
+
+### Gridland features, one per demo (`demos/features/`)
+
+| Name | What it shows |
+|------|---------------|
+| `layout` | `<box>`: flexbox, `gap`, padding and the 4 border styles (`d` row/column, `+`/`-` gap) |
+| `text` | `<text>`, `<span>`, `<b>`, `<i>`, `<u>`, colors, backgrounds and automatic wrapping |
+| `keyboard` | `useKeyboard`: shows every key and modifier you press |
+| `input` | `<input>` with `onInput`/`onSubmit` (a small to-do list) |
+| `select` | `<select>` with descriptions, `onChange` and `onSelect` |
+| `tabs` | `<tab-select>` |
+| `font` | `<ascii-font>`: big titles (`f` cycles through the 7 fonts) |
+| `responsive` | `useTerminalDimensions`: the layout changes with the window size |
+| `scroll` | `<scrollbox>` with 100 lines |
+
+## Running
 
 ```bash
 npm install
-
-# no navegador (http://localhost:5173)
-npm run dev
-
-# no terminal (precisa do Bun: curl -fsSL https://bun.sh/install | bash)
-bun install
-bun run src/cli.tsx
-
-# gera um binário único que roda sem Node nem Bun
-bun build --compile src/cli.tsx --outfile gridland-demos
-./gridland-demos
+bun install   # the terminal needs Bun: curl -fsSL https://bun.sh/install | bash
 ```
 
-**Atalhos:** `tab` ou `1`–`8` trocam de demo, `espaço` pausa, `q` sai (no terminal).
-Os atalhos de cada demo aparecem na barra de baixo.
+**In the terminal**
 
-## Estrutura
+```bash
+npm run demo            # list the demos
+npm run demo donut      # run one demo (q quits; in the input demo, esc)
+```
+
+**In the browser**
+
+```bash
+npm run dev             # http://localhost:5173 lists the demos
+                        # http://localhost:5173/?demo=donut opens one
+```
+
+**Presentation** (terminal slides, built with Gridland)
+
+```bash
+npm run slides          # ←/→ navigate, q quits
+```
+
+**Standalone binary** (runs without Node or Bun)
+
+```bash
+npm run compile
+./gridland-demos donut
+```
+
+Each demo's shortcuts are shown in the bottom bar.
+
+## Structure
 
 ```
 src/
-├── App.tsx          entrada do navegador  (<TUI> do @gridland/web)
-├── cli.tsx          entrada do terminal   (createCliRenderer do @gridland/bun)
-├── DemoHub.tsx      abas + barra de atalhos, compartilhado pelas duas entradas
-├── lib/
-│   ├── frame.tsx    framebuffer de caracteres/cores, <FrameView>, relógio, paletas
-│   └── math3d.ts    vetores, rotação e correção de aspecto da célula
-└── demos/           uma demo por arquivo
+├── cli.tsx          terminal entry  (createCliRenderer from @gridland/bun)
+├── main.tsx         browser entry   (<TUI> from @gridland/web, ?demo=<name>)
+├── Runner.tsx       one demo full screen + shortcut bar, used by both entries
+├── demos.ts         registry: name → component
+└── lib/
+    ├── frame.tsx    character/color framebuffer, <FrameView>, clock, palettes
+    └── math3d.ts    vectors, rotation and cell aspect correction
+demos/
+├── visual/          3D demos and effects
+└── features/        one Gridland feature per file
+presentation/
+└── slides.tsx       terminal presentation
 ```
 
-## Como as demos 3D funcionam
+## How the 3D demos work
 
-Todas seguem o mesmo padrão:
+They all follow the same pattern:
 
-1. `useClock()` re-renderiza o componente ~30 vezes por segundo e devolve o tempo `t`.
-2. A demo calcula um `Frame` (um caractere e uma cor por célula) com matemática pura em JS.
-3. `<FrameView>` converte o frame em linhas `<text>` e agrupa caracteres vizinhos de mesma
-   cor num único `<span>`, o que mantém o reconciler leve.
+1. `useClock()` re-renders the component ~30 times per second and returns the time `t`.
+2. The demo computes a `Frame` (one character and one color per cell) with plain JS math.
+3. `<FrameView>` turns the frame into `<text>` lines and groups neighboring characters of the same
+   color into a single `<span>`, which keeps the reconciler light.
 
-Um detalhe importante: células de terminal são cerca de 2x mais altas que largas. Por isso a projeção
-multiplica X por `CELL_ASPECT = 2`; sem isso, tudo sai achatado.
+One important detail: terminal cells are about 2x taller than they are wide. That's why the projection
+multiplies X by `CELL_ASPECT = 2`; without it, everything looks squashed.
 
-## Criando sua própria demo
+## Creating your own demo
 
 ```tsx
-// src/demos/minha-demo.tsx
+// demos/visual/my-demo.tsx
 // @ts-nocheck
-import { createFrame, FrameView, useClock, put } from "../lib/frame"
+import { createFrame, FrameView, useClock, put } from "../../src/lib/frame"
 
-export function MinhaDemo({ width, height }) {
+export function MyDemo({ width, height }) {
   const t = useClock()
   const f = createFrame(width, height)
   const x = (Math.sin(t) * 0.5 + 0.5) * (width - 1)
   put(f, x, height / 2, "●", "#ff4fd8")
   return <FrameView frame={f} />
 }
-export const minhaDemoHelp = [["", "uma bolinha indo e voltando"]]
+export const myDemoHelp = [["", "a ball bouncing back and forth"]]
 ```
 
-Depois registre a demo na lista `DEMOS` em `src/DemoHub.tsx`.
+Then register it in `DEMOS` in `src/demos.ts` and run it with `npm run demo my-demo`.
 
-Também dá para instalar componentes prontos do registry do Gridland:
-`bunx create-gridland add spinner` (o `components.json` já está configurado).
+You can also install ready-made components from the Gridland registry:
+`bunx create-gridland add spinner` (`components.json` is already configured).

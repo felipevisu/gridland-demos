@@ -1,8 +1,8 @@
 // @ts-nocheck
-// Plasma: efeito demoscene clássico. Somamos ondas senoidais e mapeamos o valor numa paleta.
+// Plasma: classic demoscene effect. We sum sine waves and map the value onto a palette.
 import { useState } from "react"
 import { useKeyboard } from "@gridland/utils"
-import { createFrame, FrameView, useClock, palette, putText, BLOCKS } from "../lib/frame"
+import { createFrame, FrameView, useClock, palette, putText, BLOCKS } from "../../src/lib/frame"
 
 const PALETTES = [
   { name: "lava", pal: palette(["#0d0221", "#6a0572", "#ff3864", "#ffb563", "#fff3b0", "#ff3864", "#0d0221"], 24) },
@@ -36,11 +36,11 @@ export function PlasmaDemo({ width, height }) {
       f.colors[i] = pal[Math.floor(n * (pal.length - 1))]
     }
   }
-  putText(f, 1, 0, ` paleta: ${name} `, "#ffffff")
+  putText(f, 1, 0, ` palette: ${name} `, "#ffffff")
   return <FrameView frame={f} />
 }
 
 export const plasmaHelp = [
-  ["c", "paleta"],
-  ["espaço", "pausar"],
+  ["c", "palette"],
+  ["space", "pause"],
 ]

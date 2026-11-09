@@ -1,4 +1,4 @@
-// Matemática 3D mínima usada pelas demos (sem dependências).
+// Minimal 3D math used by the demos (no dependencies).
 export type V3 = [number, number, number]
 
 export const add = (a: V3, b: V3): V3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
@@ -11,7 +11,7 @@ export const norm = (a: V3): V3 => {
   return [a[0] / l, a[1] / l, a[2] / l]
 }
 
-/** Rotaciona um ponto em torno dos eixos X, Y e Z (nessa ordem). */
+/** Rotates a point around the X, Y and Z axes (in that order). */
 export function rotate(p: V3, ax: number, ay: number, az: number): V3 {
   let [x, y, z] = p
   let c = Math.cos(ax), s = Math.sin(ax)
@@ -24,7 +24,7 @@ export function rotate(p: V3, ax: number, ay: number, az: number): V3 {
 }
 
 /**
- * Células do terminal são ~2x mais altas que largas.
- * Multiplicamos X por este fator na projeção para as formas não ficarem achatadas.
+ * Terminal cells are ~2x taller than they are wide.
+ * We multiply X by this factor when projecting so shapes don't look squashed.
  */
 export const CELL_ASPECT = 2

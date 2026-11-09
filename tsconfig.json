@@ -13,5 +13,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "gridland-jsx.d.ts"]
+  "include": ["src", "demos", "presentation", "gridland-jsx.d.ts"]
 }

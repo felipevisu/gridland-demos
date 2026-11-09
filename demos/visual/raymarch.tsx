@@ -1,11 +1,11 @@
 // @ts-nocheck
-// Ray marching em tempo real: cada célula do terminal dispara um raio numa cena
-// descrita por funções de distância (SDF): esfera, toro girando e um chão xadrez.
-// Tem luz difusa, especular e sombra suave. Mova a luz com as setas ou o mouse.
+// Real-time ray marching: each terminal cell casts a ray into a scene
+// described by signed distance functions (SDF): a sphere, a spinning torus and a checkered floor.
+// Diffuse light, specular and soft shadows. Move the light with the arrow keys or the mouse.
 import { useRef, useState } from "react"
 import { useKeyboard } from "@gridland/utils"
-import { createFrame, FrameView, useClock, palette, putText, RAMP } from "../lib/frame"
-import { CELL_ASPECT, norm, dot, sub, type V3 } from "../lib/math3d"
+import { createFrame, FrameView, useClock, palette, putText, RAMP } from "../../src/lib/frame"
+import { CELL_ASPECT, norm, dot, sub, type V3 } from "../../src/lib/math3d"
 
 const PAL = {
   sphere: palette(["#12001f", "#7a2cff", "#c99bff", "#ffffff"]),
@@ -19,12 +19,12 @@ function sdTorus(p: V3, R: number, r: number) {
   return Math.sqrt(q * q + p[1] * p[1]) - r
 }
 
-// devolve [distância, material]
+// returns [distance, material]
 function scene(p: V3, t: number): [number, number] {
-  // esfera "respirando"
+  // "breathing" sphere
   const sy = Math.sin(t * 1.5) * 0.25
   const dS = Math.sqrt(p[0] * p[0] + (p[1] - sy) ** 2 + p[2] * p[2]) - 0.85
-  // toro inclinado girando ao redor da esfera
+  // tilted torus spinning around the sphere
   const a = t * 0.9, b = 0.6
   let x = p[0], y = p[1] - sy, z = p[2]
   ;[x, z] = [x * Math.cos(a) - z * Math.sin(a), x * Math.sin(a) + z * Math.cos(a)]
@@ -78,7 +78,7 @@ export function RaymarchDemo({ width, height, originX = 0, originY = 0 }) {
   const { az, el } = light.current
   const lightDir = norm([Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el)])
 
-  // câmera orbitando lentamente
+  // slowly orbiting camera
   const ca = orbit.current + t * 0.15
   const ro: V3 = [Math.sin(ca) * 3.8, 1.1, -Math.cos(ca) * 3.8]
   const fwd = norm(sub([0, 0, 0], ro))
@@ -110,7 +110,7 @@ export function RaymarchDemo({ width, height, originX = 0, originY = 0 }) {
       }
       const idx = y * width + x
       if (!m) {
-        // céu: um leve degradê com estrelas
+        // sky: a soft gradient with stars
         const star = ((x * 73856093) ^ (y * 19349663)) % 97 === 0
         f.chars[idx] = star ? "·" : " "
         f.colors[idx] = star ? "#3a3a5a" : null
@@ -132,12 +132,12 @@ export function RaymarchDemo({ width, height, originX = 0, originY = 0 }) {
     }
   }
 
-  putText(f, 1, 0, `luz az ${az.toFixed(1)} el ${el.toFixed(1)}${paused ? "  [pausado]" : ""}`, "#6b6b8a")
+  putText(f, 1, 0, `light az ${az.toFixed(1)} el ${el.toFixed(1)}${paused ? "  [paused]" : ""}`, "#6b6b8a")
 
   return (
     <box
       onMouseMove={(e) => {
-        // o mouse vira a direção da luz (no navegador ou em terminais com mouse)
+        // the mouse sets the light direction (in the browser or in terminals with mouse support)
         const mx = (e.x - originX) / Math.max(1, width)
         const my = (e.y - originY) / Math.max(1, height)
         light.current.az = mx * Math.PI * 2
@@ -150,7 +150,7 @@ export function RaymarchDemo({ width, height, originX = 0, originY = 0 }) {
 }
 
 export const raymarchHelp = [
-  ["←→↑↓/mouse", "luz"],
-  ["a/d", "câmera"],
-  ["espaço", "pausar"],
+  ["←→↑↓/mouse", "light"],
+  ["a/d", "camera"],
+  ["space", "pause"],
 ]

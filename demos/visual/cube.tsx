@@ -1,11 +1,11 @@
 // @ts-nocheck
-// Cubo 3D sólido com z-buffer e iluminação por face.
-// Técnica: amostramos pontos em cada face, rotacionamos, projetamos em perspectiva
-// e guardamos só o ponto mais próximo de cada célula (z-buffer).
+// Solid 3D cube with a z-buffer and per-face lighting.
+// Technique: sample points on each face, rotate them, project in perspective
+// and keep only the closest point per cell (z-buffer).
 import { useState } from "react"
 import { useKeyboard } from "@gridland/utils"
-import { createFrame, FrameView, useClock, palette, putText, RAMP } from "../lib/frame"
-import { rotate, dot, norm, CELL_ASPECT, type V3 } from "../lib/math3d"
+import { createFrame, FrameView, useClock, palette, putText, RAMP } from "../../src/lib/frame"
+import { rotate, dot, norm, CELL_ASPECT, type V3 } from "../../src/lib/math3d"
 
 const FACES: { n: V3; u: V3; v: V3; pal: string[] }[] = [
   { n: [0, 0, 1], u: [1, 0, 0], v: [0, 1, 0], pal: palette(["#1a0b2e", "#ff4fd8", "#ffd6f6"]) },
@@ -42,7 +42,7 @@ export function CubeDemo({ width, height }) {
 
   for (const face of FACES) {
     const n = rotate(face.n, ax, ay, az)
-    if (n[2] > 0.05) continue // face de costas para a câmera
+    if (n[2] > 0.05) continue // face pointing away from the camera
     const lum = Math.max(0, dot(n, LIGHT)) * 0.7 + 0.3
     const ci = Math.min(15, Math.floor(lum * 15.99))
     const ch = RAMP[Math.min(RAMP.length - 1, 1 + Math.floor(lum * (RAMP.length - 1)))]
@@ -61,7 +61,7 @@ export function CubeDemo({ width, height }) {
         const i = sy * width + sx
         if (ooz > zbuf[i]) {
           zbuf[i] = ooz
-          // bordas da face ficam mais claras para dar contorno
+          // face edges are brighter to give an outline
           const edge = Math.abs(a) > 0.95 || Math.abs(b) > 0.95
           f.chars[i] = edge ? "@" : ch
           f.colors[i] = edge ? face.pal[15] : face.pal[ci]
@@ -70,12 +70,12 @@ export function CubeDemo({ width, height }) {
     }
   }
 
-  putText(f, 1, 0, `velocidade ${speed.toFixed(2)}x${paused ? "  [pausado]" : ""}`, "#6b6b8a")
+  putText(f, 1, 0, `speed ${speed.toFixed(2)}x${paused ? "  [paused]" : ""}`, "#6b6b8a")
   return <FrameView frame={f} />
 }
 
 export const cubeHelp = [
-  ["espaço", "pausar"],
-  ["↑↓", "velocidade"],
+  ["space", "pause"],
+  ["↑↓", "speed"],
   ["+/-", "zoom"],
 ]

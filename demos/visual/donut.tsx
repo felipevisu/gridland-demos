@@ -1,14 +1,14 @@
 // @ts-nocheck
-// O clássico "donut.c" (Andy Sloane) reescrito em React + Gridland,
-// com cor por luminância e paletas trocáveis.
+// The classic "donut.c" (Andy Sloane) rewritten in React + Gridland,
+// with luminance-based color and switchable palettes.
 import { useState } from "react"
 import { useKeyboard } from "@gridland/utils"
-import { createFrame, FrameView, useClock, palette, putText, RAMP } from "../lib/frame"
-import { CELL_ASPECT } from "../lib/math3d"
+import { createFrame, FrameView, useClock, palette, putText, RAMP } from "../../src/lib/frame"
+import { CELL_ASPECT } from "../../src/lib/math3d"
 
 const PALETTES = [
   { name: "sunset", pal: palette(["#2a0b1f", "#ff3d6e", "#ffb347", "#fff4d6"]) },
-  { name: "oceano", pal: palette(["#03122b", "#1565ff", "#3df2ff", "#e9ffff"]) },
+  { name: "ocean", pal: palette(["#03122b", "#1565ff", "#3df2ff", "#e9ffff"]) },
   { name: "matrix", pal: palette(["#021a05", "#11aa22", "#5cff6e", "#eaffea"]) },
   { name: "neon", pal: palette(["#14002b", "#8a2be2", "#ff2fd0", "#fff0ff"]) },
 ]
@@ -32,7 +32,7 @@ export function DonutDemo({ width, height }) {
   const R1 = 1, R2 = 2, K2 = 5
   const K1 = Math.min(height, width / CELL_ASPECT) * K2 * 0.28
 
-  // quanto maior a tela, mais densa a amostragem
+  // the bigger the screen, the denser the sampling
   const dTheta = 0.07 * (40 / Math.max(40, height))
   const dPhi = 0.02 * (40 / Math.max(40, height))
 
@@ -60,11 +60,11 @@ export function DonutDemo({ width, height }) {
     }
   }
 
-  putText(f, 1, 0, `paleta: ${name}${paused ? "  [pausado]" : ""}`, "#6b6b8a")
+  putText(f, 1, 0, `palette: ${name}${paused ? "  [paused]" : ""}`, "#6b6b8a")
   return <FrameView frame={f} />
 }
 
 export const donutHelp = [
-  ["espaço", "pausar"],
-  ["c", "paleta"],
+  ["space", "pause"],
+  ["c", "palette"],
 ]

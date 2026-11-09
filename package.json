@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "terminal": "bun run src/cli.tsx",
+    "demo": "bun run src/cli.tsx",
+    "slides": "bun run presentation/slides.tsx",
     "compile": "bun build --compile src/cli.tsx --outfile gridland-demos"
   },
   "dependencies": {

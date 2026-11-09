@@ -1,10 +1,10 @@
 // @ts-nocheck
-// Voo sobre um terreno 3D em wireframe, estilo synthwave.
-// Uma malha de alturas (soma de senos) é projetada em perspectiva e ligada com linhas (Bresenham).
+// Flight over a 3D wireframe terrain, synthwave style.
+// A heightmap (sum of sines) is projected in perspective and connected with lines (Bresenham).
 import { useState } from "react"
 import { useKeyboard } from "@gridland/utils"
-import { createFrame, put, FrameView, useClock, palette, putText } from "../lib/frame"
-import { CELL_ASPECT } from "../lib/math3d"
+import { createFrame, put, FrameView, useClock, palette, putText } from "../../src/lib/frame"
+import { CELL_ASPECT } from "../../src/lib/math3d"
 
 const HEIGHT_PAL = palette(["#2b0a4a", "#ff2fa8", "#ffb347", "#fff6c2"], 12)
 const SUN_PAL = palette(["#ff2f6d", "#ffcc33"], 8)
@@ -14,12 +14,12 @@ function heightAt(x: number, z: number) {
     Math.sin(x * 0.35 + z * 0.12) * 0.9 +
     Math.sin(x * 0.11 - z * 0.27) * 1.4 +
     Math.cos(x * 0.6 + z * 0.4) * 0.35
-  ) * Math.min(1, Math.abs(x) / 3) // vale plano no meio, como uma estrada
+  ) * Math.min(1, Math.abs(x) / 3) // flat valley in the middle, like a road
 }
 
 function line(f, x0, y0, x1, y1, color) {
   x0 |= 0; y0 |= 0; x1 |= 0; y1 |= 0
-  // escolhe o caractere pela inclinação do segmento (células são 2x mais altas)
+  // pick the character by segment slope (cells are 2x taller)
   const ax = Math.abs(x1 - x0), ay = Math.abs(y1 - y0) * 2
   const ch = ay < ax * 0.5 ? "─" : ax < ay * 0.5 ? "│" : (x1 - x0) * (y1 - y0) > 0 ? "\\" : "/"
   const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0)
@@ -48,7 +48,7 @@ export function TerrainDemo({ width, height }) {
   const f = createFrame(width, height)
   const horizon = Math.floor(height * 0.42)
 
-  // sol com faixas
+  // striped sun
   const sunR = Math.min(height * 0.32, width / CELL_ASPECT * 0.2)
   const sunCx = width / 2
   for (let y = Math.ceil(horizon - sunR + 1); y < horizon; y++) {
@@ -77,7 +77,7 @@ export function TerrainDemo({ width, height }) {
     ]
   }
 
-  // de trás para frente, linhas mais próximas sobrescrevem as distantes
+  // back to front, so closer lines overwrite distant ones
   for (let r = ROWS; r >= 0; r--) {
     const wz = z0 + r * SPACING
     let prev = null
@@ -92,11 +92,11 @@ export function TerrainDemo({ width, height }) {
     }
   }
 
-  putText(f, 1, 0, `velocidade ${speed.toFixed(2)}x${paused ? "  [pausado]" : ""}`, "#6b6b8a")
+  putText(f, 1, 0, `speed ${speed.toFixed(2)}x${paused ? "  [paused]" : ""}`, "#6b6b8a")
   return <FrameView frame={f} />
 }
 
 export const terrainHelp = [
-  ["↑↓", "velocidade"],
-  ["espaço", "pausar"],
+  ["↑↓", "speed"],
+  ["space", "pause"],
 ]

@@ -1,10 +1,10 @@
 // @ts-nocheck
-// Campo de estrelas 3D (warp). Cada estrela é um ponto (x, y, z) que se aproxima da câmera;
-// projetamos x/z e y/z na tela e desenhamos um rastro entre a posição anterior e a atual.
+// 3D starfield (warp). Each star is a point (x, y, z) moving toward the camera;
+// we project x/z and y/z onto the screen and draw a trail from the previous position to the current one.
 import { useRef, useState } from "react"
 import { useKeyboard } from "@gridland/utils"
-import { createFrame, put, FrameView, useClock, palette, putText } from "../lib/frame"
-import { CELL_ASPECT } from "../lib/math3d"
+import { createFrame, put, FrameView, useClock, palette, putText } from "../../src/lib/frame"
+import { CELL_ASPECT } from "../../src/lib/math3d"
 
 const PAL = palette(["#1b1b3a", "#5d6bff", "#bfe3ff", "#ffffff"], 10)
 const N = 420
@@ -42,7 +42,7 @@ export function StarfieldDemo({ width, height }) {
     if (sx < 0 || sy < 0 || sx >= width || sy >= height) { Object.assign(s, spawn(true)); continue }
     const bright = 1 - Math.min(1, s.z / 20)
     const col = PAL[Math.min(9, Math.floor(bright * 10))]
-    // rastro: da posição antiga até a atual
+    // trail: from the old position to the current one
     if (warp > 1.5 && pz > s.z) {
       const ox = cx + (s.x / pz) * fov * CELL_ASPECT
       const oy = cy + (s.y / pz) * fov
@@ -55,11 +55,11 @@ export function StarfieldDemo({ width, height }) {
     put(f, sx, sy, bright > 0.8 ? "@" : bright > 0.55 ? "*" : bright > 0.3 ? "+" : ".", col)
   }
 
-  putText(f, 1, 0, `warp ${warp.toFixed(1)}${paused ? "  [pausado]" : ""}`, "#6b6b8a")
+  putText(f, 1, 0, `warp ${warp.toFixed(1)}${paused ? "  [paused]" : ""}`, "#6b6b8a")
   return <FrameView frame={f} />
 }
 
 export const starfieldHelp = [
   ["↑↓", "warp"],
-  ["espaço", "pausar"],
+  ["space", "pause"],
 ]

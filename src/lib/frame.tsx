@@ -1,9 +1,9 @@
 // @ts-nocheck
-// Infra compartilhada pelas demos: um "framebuffer" de caracteres + cores,
-// um componente que o desenha com <text>/<span> do Gridland e um relógio de animação.
+// Shared demo infrastructure: a character + color "framebuffer",
+// a component that draws it with Gridland's <text>/<span>, and an animation clock.
 import { useEffect, useRef, useState } from "react"
 
-/** Rampa de luminância clássica (escuro → claro). */
+/** Classic luminance ramp (dark → light). */
 export const RAMP = " .,-~:;=!*#$@"
 export const BLOCKS = " ░▒▓█"
 
@@ -28,14 +28,14 @@ export function put(f: Frame, x: number, y: number, ch: string, color: string | 
   f.colors[i] = color
 }
 
-/** Escreve um texto no frame (útil para HUDs dentro das demos). */
+/** Writes text into the frame (handy for HUDs inside demos). */
 export function putText(f: Frame, x: number, y: number, text: string, color: string) {
   for (let i = 0; i < text.length; i++) put(f, x + i, y, text[i], color)
 }
 
 /**
- * Desenha o frame. Caracteres vizinhos com a mesma cor são agrupados em um único <span>,
- * o que reduz muito o número de nós que o reconciler precisa atualizar a cada quadro.
+ * Draws the frame. Neighboring characters with the same color are grouped into a single <span>,
+ * which greatly reduces the number of nodes the reconciler has to update each frame.
  */
 export function FrameView({ frame }: { frame: Frame }) {
   const rows = []
@@ -61,7 +61,7 @@ export function FrameView({ frame }: { frame: Frame }) {
   return <box flexDirection="column">{rows}</box>
 }
 
-/** Relógio de animação: devolve o tempo em segundos e re-renderiza ~fps vezes por segundo. */
+/** Animation clock: returns time in seconds and re-renders ~fps times per second. */
 export function useClock(fps = 30, paused = false) {
   const [, force] = useState(0)
   const tRef = useRef(0)
@@ -79,7 +79,7 @@ export function useClock(fps = 30, paused = false) {
   return tRef.current
 }
 
-// ---------- cores ----------
+// ---------- colors ----------
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 const hex2 = (v: number) => Math.round(clamp01(v) * 255).toString(16).padStart(2, "0")
@@ -98,7 +98,7 @@ export function hsl(h: number, s: number, l: number) {
   return rgb(f(0), f(8), f(4))
 }
 
-/** Cria uma paleta com `steps` cores interpolando entre as paradas dadas (hex). */
+/** Builds a palette of `steps` colors interpolated between the given stops (hex). */
 export function palette(stops: string[], steps = 16): string[] {
   const parsed = stops.map((s) => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16) / 255))
   const out = []
@@ -113,7 +113,7 @@ export function palette(stops: string[], steps = 16): string[] {
   return out
 }
 
-/** Escolhe caractere e cor para uma luminância 0..1. */
+/** Picks a character and color for a 0..1 luminance. */
 export function shade(lum: number, pal: string[], ramp = RAMP): [string, string] {
   const l = clamp01(lum)
   const ch = ramp[Math.min(ramp.length - 1, 1 + Math.floor(l * (ramp.length - 1)))]
